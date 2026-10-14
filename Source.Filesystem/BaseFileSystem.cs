@@ -309,8 +309,11 @@ public partial class BaseFileSystem : IFileSystem
 		while (iterator.MoveNext()) {
 			ISearchPath path = iterator.Current;
 			if (path is DiskSearchPath disk) {
-				if (disk.ExistsOnDisk(filenameNormalized))
-					return ISearchPath.Concat(path, fileName, dest);
+				if (disk.ExistsOnDisk(filenameNormalized)) {
+					// Return the resolved path so case-insensitive matches work on case-sensitive filesystems
+					int len = strcpy(dest, disk.GetFullPath(filenameNormalized));
+					return dest[..len];
+				}
 
 				string resolved = g_AddonFileSystem.ResolveFile(disk.GetFullPath(filenameNormalized));
 				if (resolved.Length != 0) {
@@ -654,8 +657,13 @@ public partial class BaseFileSystem : IFileSystem
 				ISearchPath spi = searchpath.path;
 				ReadOnlySpan<char> pack = "";
 				ReadOnlySpan<char> type = "";
-				if (false /* TODO: Map-based pack files */) {
-					// type = "(map)";
+				if (spi is ZipPackFileSearchPath zpsp) {
+					type = "(map)";
+					pack = zpsp.DiskPath;
+				}
+				else if (spi is AddonSearchPath asp) {
+					type = "(addons)";
+					pack = asp.DiskPath;
 				}
 				else if (spi is PackStoreSearchPath pssp) {
 					type = "(VPK)";

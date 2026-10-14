@@ -1904,7 +1904,7 @@ public static class Vox
 						pair.token.word = $"S({path}{name})";
 						pair.value.Set(name);
 
-						pathbuffer = $"{soundServices.GetGameDir()}/sound/{path}{name}.wav".Replace('/', '\\');
+						pathbuffer = $"{soundServices.GetGameDir()}/sound/{path}{name}.wav".Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
 						pair.fullpath.Set(pathbuffer);
 
 						CCPairsInsert(ccpairs, pair);
